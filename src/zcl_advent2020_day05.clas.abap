@@ -1,0 +1,79 @@
+CLASS zcl_advent2020_day05 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    INTERFACES if_oo_adt_classrun .
+
+    METHODS part1 IMPORTING it_input      TYPE stringtab
+                  RETURNING VALUE(rv_max) TYPE i.
+
+    METHODS part2 IMPORTING it_input             TYPE stringtab
+                  RETURNING VALUE(rv_my_seat_id) TYPE i.
+
+    METHODS get_seat_id IMPORTING iv_raw            TYPE char10
+                        RETURNING VALUE(rv_seat_id) TYPE i.
+    METHODS get_row IMPORTING iv_raw        TYPE char7
+                    RETURNING VALUE(rv_row) TYPE i.
+    METHODS get_column IMPORTING iv_raw           TYPE char3
+                       RETURNING VALUE(rv_column) TYPE i.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+
+CLASS zcl_advent2020_day05 IMPLEMENTATION.
+  METHOD if_oo_adt_classrun~main.
+    DATA(lt_input)   = NEW lcl_input(  )->mt_input.
+    DATA(lv_count_1) = part1( lt_input ).
+    DATA(lv_count_2) = part2( lt_input ).
+
+    out->write( |{ lv_count_1 } - { lv_count_2 }| ).
+  ENDMETHOD.
+
+  METHOD get_row.
+    DATA(lv_binary) = iv_raw.
+    REPLACE ALL OCCURRENCES OF: 'F' IN lv_binary WITH '0',
+                                'B' IN lv_binary WITH '1'.
+    rv_row = /ui2/cl_number=>base_converter( number = lv_binary from = 2 to = 10 ).
+  ENDMETHOD.
+
+  METHOD get_column.
+    DATA(lv_binary) = iv_raw.
+    REPLACE ALL OCCURRENCES OF: 'L' IN lv_binary WITH '0',
+                                'R' IN lv_binary WITH '1'.
+    rv_column = /ui2/cl_number=>base_converter( number = lv_binary from = 2 to = 10 ).
+  ENDMETHOD.
+
+  METHOD get_seat_id.
+    rv_seat_id = get_row( iv_raw(7) ) * 8 + get_column( iv_raw+7 ).
+  ENDMETHOD.
+
+  METHOD part1.
+    LOOP AT it_input INTO DATA(lv_input).
+      DATA(lv_num) = get_seat_id( CONV #( lv_input ) ).
+      CHECK rv_max < lv_num.
+      rv_max = lv_num.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD part2.
+    DATA lt_seat_id TYPE STANDARD TABLE OF i.
+    lt_seat_id = VALUE #( FOR lv_input IN it_input ( get_seat_id( CONV #( lv_input ) ) ) ).
+
+    SORT lt_seat_id DESCENDING.
+    DATA lt_my_seat_id LIKE lt_seat_id.
+    LOOP AT lt_seat_id INTO DATA(lv_seat_id).
+      ASSIGN lt_seat_id[ sy-tabix + 1 ] TO FIELD-SYMBOL(<lv_next_seat_id>).
+      CHECK lv_seat_id - <lv_next_seat_id> = 2.
+
+      rv_my_seat_id = <lv_next_seat_id> + 1.
+      RETURN.
+    ENDLOOP.
+  ENDMETHOD.
+
+ENDCLASS.
