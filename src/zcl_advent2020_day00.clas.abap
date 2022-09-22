@@ -1,22 +1,22 @@
-CLASS zcl_advent2020_day00 DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+class ZCL_ADVENT2020_DAY00 definition
+  public
+  final
+  create public .
 
-  PUBLIC SECTION.
+public section.
 
-    INTERFACES if_oo_adt_classrun .
+  interfaces IF_OO_ADT_CLASSRUN .
 
-    METHODS part1
-      IMPORTING
-        it_input       TYPE stringtab
-      RETURNING
-        VALUE(rv_count) TYPE i .
-    METHODS part2
-      IMPORTING
-        it_input       TYPE stringtab
-      RETURNING
-        VALUE(rv_count) TYPE i .
+  methods PART1
+    importing
+      !IT_INPUT type STRINGTAB
+    returning
+      value(RV_COUNT) type DECFLOAT34 .
+  methods PART2
+    importing
+      !IT_INPUT type STRINGTAB
+    returning
+      value(RV_COUNT) type DECFLOAT34 .
   PROTECTED SECTION.
 
   PRIVATE SECTION.
@@ -29,15 +29,14 @@ CLASS ZCL_ADVENT2020_DAY00 IMPLEMENTATION.
 
   METHOD if_oo_adt_classrun~main.
     DATA(lt_input)   = NEW lcl_input(  )->mt_input.
-    DATA(lv_count1) = part1( it_input = lt_input ).
-    DATA(lv_count2) = part2( it_input = lt_input ).
+    DATA(lv_count1) = part1( lt_input ).
+    DATA(lv_count2) = part2( lt_input ).
     CHECK out IS NOT INITIAL.
     out->write( |{ lv_count1 } { lv_count2 }| ).
   ENDMETHOD.
 
 
   METHOD part1.
-
   ENDMETHOD.
 
 
