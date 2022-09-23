@@ -6,7 +6,7 @@
 CLASS lcl_input DEFINITION.
   PUBLIC SECTION.
     METHODS constructor.
-    DATA mt_input TYPE stringtab.
+    DATA mt_input TYPE string_table.
 ENDCLASS.
 
 

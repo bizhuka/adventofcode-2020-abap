@@ -1,43 +1,43 @@
-class ZCL_ADVENT2020_DAY20 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day20 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun .
 
-  methods PART1
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
-  methods PART2
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
-  class-methods GET_TOTAL_FIT_COUNT
-    importing
-      !IV_TILE_COUNT type I
-    returning
-      value(RV_FIT_COUNT) type I .
+    METHODS part1
+      IMPORTING
+        !it_input       TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34 .
+    METHODS part2
+      IMPORTING
+        !it_input       TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34 .
+    CLASS-METHODS get_total_fit_count
+      IMPORTING
+        !iv_tile_count      TYPE i
+      RETURNING
+        VALUE(rv_fit_count) TYPE i .
   PROTECTED SECTION.
 
-private section.
+  PRIVATE SECTION.
 
-  data MT_TILE type TT_TILE .
+    DATA mt_tile TYPE tt_tile .
 
-  methods READ_TILES
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RT_TILE) type TT_TILE .
+    METHODS read_tiles
+      IMPORTING
+        !it_input      TYPE string_table
+      RETURNING
+        VALUE(rt_tile) TYPE tt_tile .
 ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY20 IMPLEMENTATION.
+CLASS zcl_advent2020_day20 IMPLEMENTATION.
 
 
   METHOD get_total_fit_count.
@@ -109,7 +109,7 @@ CLASS ZCL_ADVENT2020_DAY20 IMPLEMENTATION.
       DATA(lv_index) = sy-index.
       DATA(lv_from)  = ( lv_index - 1 ) * 12 + 1.
 
-      DATA(lt_array) = VALUE stringtab( ).
+      DATA(lt_array) = VALUE string_table( ).
       LOOP AT it_input INTO DATA(lv_row) FROM lv_from TO lv_from + 10.
         APPEND lv_row TO lt_array[].
       ENDLOOP.

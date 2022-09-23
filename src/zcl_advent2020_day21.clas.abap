@@ -1,60 +1,60 @@
-class ZCL_ADVENT2020_DAY21 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day21 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun.
 
-  types:
-    tt_ingredient TYPE SORTED TABLE OF string WITH UNIQUE KEY table_line .
-  types:
-    BEGIN OF ts_food,
+    TYPES:
+      tt_ingredient TYPE SORTED TABLE OF string WITH UNIQUE KEY table_line.
+    TYPES:
+      BEGIN OF ts_food,
         t_ingredients TYPE tt_ingredient,
         t_allergens   TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-      END OF ts_food .
-  types:
-    tt_food TYPE STANDARD TABLE OF ts_food WITH DEFAULT KEY .
+      END OF ts_food.
+    TYPES:
+      tt_food TYPE STANDARD TABLE OF ts_food WITH DEFAULT KEY.
 
-  methods PART1
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
-  methods PART2
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_DANGEROUS) type STRING .
+    METHODS part1
+      IMPORTING
+        it_input        TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34.
+    METHODS part2
+      IMPORTING
+        it_input            TYPE string_table
+      RETURNING
+        VALUE(rv_dangerous) TYPE string.
   PROTECTED SECTION.
 
-private section.
+  PRIVATE SECTION.
 
-  data MT_DANGEROUS_INGREDIENT type STRINGTAB .
-  data MT_DANGEROUS_ALLERGEN type TT_INGREDIENT .
+    DATA mt_dangerous_ingredient TYPE string_table.
+    DATA mt_dangerous_allergen TYPE tt_ingredient.
 
-  methods _READ_FOOD
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RT_FOOD) type TT_FOOD .
-  methods _GET_INTER_INGREDIENT
-    importing
-      !IT_2 type TT_INGREDIENT
-    changing
-      !CT_1 type TT_INGREDIENT .
-  methods _DELETE_ALL
-    importing
-      !IV_ALLERGEN type STRING
-      !IT_INGREDIENT type TT_INGREDIENT
-    changing
-      !CT_FOOD type TT_FOOD .
+    METHODS _read_food
+      IMPORTING
+        it_input       TYPE string_table
+      RETURNING
+        VALUE(rt_food) TYPE tt_food.
+    METHODS _get_inter_ingredient
+      IMPORTING
+        it_2 TYPE tt_ingredient
+      CHANGING
+        ct_1 TYPE tt_ingredient.
+    METHODS _delete_all
+      IMPORTING
+        iv_allergen   TYPE string
+        it_ingredient TYPE tt_ingredient
+      CHANGING
+        ct_food       TYPE tt_food.
 ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY21 IMPLEMENTATION.
+CLASS zcl_advent2020_day21 IMPLEMENTATION.
 
 
   METHOD if_oo_adt_classrun~main.

@@ -12,19 +12,19 @@ CLASS zcl_advent2020_day03 DEFINITION
                          RETURNING VALUE(rv_count) TYPE i.
 
     METHODS set_tree_pos
-      IMPORTING it_filed           TYPE stringtab.
+      IMPORTING it_filed TYPE string_table.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
     TYPES: BEGIN OF ts_tree_pos,
-             col  TYPE i,
-             row  TYPE i,
+             col TYPE i,
+             row TYPE i,
            END OF ts_tree_pos,
            tt_tree_pos TYPE SORTED TABLE OF ts_tree_pos WITH UNIQUE KEY table_line.
 
-   DATA mt_tree_pos  TYPE tt_tree_pos.
-   DATA mv_col_count TYPE i.
-   DATA mv_row_count TYPE i.
+    DATA mt_tree_pos  TYPE tt_tree_pos.
+    DATA mv_col_count TYPE i.
+    DATA mv_row_count TYPE i.
 
 ENDCLASS.
 

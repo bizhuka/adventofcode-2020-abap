@@ -1,94 +1,84 @@
-class ZCL_ADVENT2020_DAY17 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day17 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun.
 
-  types:
-    BEGIN OF ts_adjacent,
-        x TYPE i,
-        y TYPE i,
-        z TYPE i,
-        w TYPE i,
-      END OF ts_adjacent .
-  types:
-    tt_adjacent TYPE STANDARD TABLE OF ts_adjacent WITH DEFAULT KEY .
-  types:
-    BEGIN OF ts_cube,
-        x     TYPE i,
-        y     TYPE i,
-        z     TYPE i,
-        w     TYPE i,
-        state TYPE char1,
-      END OF ts_cube .
-  types:
-    tt_cube TYPE HASHED TABLE OF ts_cube WITH UNIQUE KEY x y z w .
+    TYPES:
+      char1      TYPE c LENGTH 1,
+      int4_table TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 
-  constants:
-    BEGIN OF ms_state,
+    TYPES:
+      BEGIN OF ts_cube,
+        x   TYPE i,
+        y   TYPE i,
+        z   TYPE i,
+        w   TYPE i,
+        cnt TYPE i,
+      END OF ts_cube.
+    TYPES:
+      tt_cube TYPE HASHED TABLE OF ts_cube WITH UNIQUE KEY x y z w.
+
+    CONSTANTS:
+      BEGIN OF ms_state,
         active   TYPE char1 VALUE '#',
         inactive TYPE char1 VALUE '.',
-      END OF ms_state .
-  data MT_ADJACENT type TT_ADJACENT .
-  data MT_CUBE type TT_CUBE .
+      END OF ms_state.
+    DATA mt_adjacent TYPE tt_cube.
 
     "iv_active    TYPE i DEFAULT 4
-  methods PART1
-    importing
-      !IT_INPUT type STRINGTAB
-      !IV_CYCLE type I default 6
-      !IM_MODE type I default 1
-    returning
-      value(RT_CUBE) type TT_CUBE .
-  methods PART2
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RT_CUBE) type TT_CUBE .
-  methods GET_CUBE
-    importing
-      !IT_INPUT type STRINGTAB
-      !IV_Z type I optional
-      !IV_W type I optional
-    returning
-      value(RT_CUBE) type TT_CUBE .
+    METHODS part1
+      IMPORTING
+        it_input        TYPE string_table
+        iv_cycle        TYPE i DEFAULT 6
+        im_mode         TYPE i DEFAULT 1
+      RETURNING
+        VALUE(rv_count) TYPE i.
+
+    METHODS part2
+      IMPORTING
+        it_input        TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE i.
+    METHODS get_active_cube
+      IMPORTING
+        it_input       TYPE string_table
+        iv_z           TYPE i OPTIONAL
+        iv_w           TYPE i OPTIONAL
+      RETURNING
+        VALUE(rt_cube) TYPE tt_cube.
+
   PROTECTED SECTION.
 
   PRIVATE SECTION.
-
-    METHODS _get_active_count
-      IMPORTING
-        !is_cube        TYPE ts_cube
-        !im_mode        TYPE i
-      RETURNING
-        VALUE(rv_count) TYPE i .
     METHODS _get_adjacent
       IMPORTING
-        !im_mode           TYPE i
+        im_mode            TYPE i
       RETURNING
-        VALUE(rt_adjacent) TYPE tt_adjacent .
+        VALUE(rt_adjacent) TYPE tt_cube.
 ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY17 IMPLEMENTATION.
+CLASS zcl_advent2020_day17 IMPLEMENTATION.
 
 
-  METHOD get_cube.
+  METHOD get_active_cube.
     LOOP AT it_input INTO DATA(lv_input).
-      DATA(x) = sy-tabix.
+      DATA(y) = sy-tabix.
       DO strlen( lv_input ) TIMES.
-        DATA(y)        = sy-index.
+        DATA(x)        = sy-index.
+
         DATA(lv_index) = sy-index - 1.
+        CHECK lv_input+lv_index(1) = ms_state-active.
 
         INSERT VALUE #( x     = x
                         y     = y
                         z     = iv_z
-                        w     = iv_w
-                        state = lv_input+lv_index(1) ) INTO TABLE rt_cube[].
+                        w     = iv_w ) INTO TABLE rt_cube[].
       ENDDO.
     ENDLOOP.
   ENDMETHOD.
@@ -96,90 +86,59 @@ CLASS ZCL_ADVENT2020_DAY17 IMPLEMENTATION.
 
   METHOD if_oo_adt_classrun~main.
     DATA(lt_input)  = NEW lcl_input(  )->mt_input.
-    DATA(lv_count1) = lines( part1( lt_input ) ).
-    DATA(lv_count2) = lines( part2( lt_input ) ).
-
     CHECK out IS NOT INITIAL.
-    out->write( |{ lv_count1 } { lv_count2 }| ).
+    out->write( |{ part1( lt_input ) } { part2( lt_input ) }| ).
   ENDMETHOD.
 
 
   METHOD part1.
     mt_adjacent = _get_adjacent( im_mode = im_mode ).
 
-    mt_cube[] = rt_cube[] = get_cube( it_input ).
+    DATA(lt_cube) = get_active_cube( it_input ).
 
     DO iv_cycle TIMES.
-      DATA(lt_new) = VALUE tt_cube( ).
-      LOOP AT rt_cube ASSIGNING FIELD-SYMBOL(<ls_cube>).
+
+      DATA(lt_count) = VALUE tt_cube( ).
+      LOOP AT lt_cube ASSIGNING FIELD-SYMBOL(<ls_cube>).
         LOOP AT mt_adjacent ASSIGNING FIELD-SYMBOL(<ls_adjacent>).
-          DATA(x) = <ls_cube>-x + <ls_adjacent>-x.
-          DATA(y) = <ls_cube>-y + <ls_adjacent>-y.
-          DATA(z) = <ls_cube>-z + <ls_adjacent>-z.
-          DATA(w) = <ls_cube>-w + <ls_adjacent>-w.
-          ASSIGN rt_cube[ x = x y = y z = z w = w ] TO FIELD-SYMBOL(<ls_cube_curr>).
-          CHECK sy-subrc <> 0.
-          INSERT VALUE #( x = x y = y z = z w = w state = ms_state-inactive ) INTO TABLE lt_new.
+          COLLECT VALUE ts_cube( x   = <ls_cube>-x + <ls_adjacent>-x
+                                 y   = <ls_cube>-y + <ls_adjacent>-y
+                                 z   = <ls_cube>-z + <ls_adjacent>-z
+                                 w   = <ls_cube>-w + <ls_adjacent>-w
+                                 cnt = 1 ) INTO lt_count.
         ENDLOOP.
       ENDLOOP.
-      INSERT LINES OF lt_new INTO TABLE rt_cube[].
 
-      DATA(lt_result) = VALUE tt_cube( ).
-      DATA(lv_active) = 0.
-      LOOP AT rt_cube ASSIGNING <ls_cube>.
-        DATA(lv_state) = <ls_cube>-state.
-        DATA(lv_active_count) = _get_active_count( is_cube = <ls_cube>
-                                                   im_mode = im_mode ).
-        CASE lv_state.
-          WHEN ms_state-active.
-            IF NOT lv_active_count BETWEEN 2 AND 3.
-              lv_state = ms_state-inactive.
-            ENDIF.
-
-          WHEN ms_state-inactive.
-            IF  lv_active_count = 3.
-              lv_state = ms_state-active.
-            ENDIF.
-        ENDCASE.
-
-        IF lv_state = ms_state-active.
-          lv_active = lv_active + 1.
-        ENDIF.
-
-        INSERT VALUE #( x    = <ls_cube>-x
-                        y    = <ls_cube>-y
-                        z    = <ls_cube>-z
-                        w    = <ls_cube>-w
-                        state = lv_state ) INTO TABLE lt_result[].
+      DATA(lt_new) = VALUE tt_cube( ).
+      LOOP AT lt_count ASSIGNING FIELD-SYMBOL(<ls_count>) WHERE cnt = 3.
+        ASSIGN lt_cube[ x = <ls_count>-x
+                        y = <ls_count>-y
+                        z = <ls_count>-z
+                        w = <ls_count>-w ] TO <ls_cube>.
+        CHECK sy-subrc <> 0.
+        INSERT <ls_count> INTO TABLE lt_new.
       ENDLOOP.
 
-      mt_cube[] =  rt_cube[] = lt_result[].
+      LOOP AT lt_cube ASSIGNING <ls_cube>.
+        ASSIGN lt_count[ x = <ls_cube>-x
+                         y = <ls_cube>-y
+                         z = <ls_cube>-z
+                         w = <ls_cube>-w ] TO <ls_count>.
+        CHECK sy-subrc = 0 AND <ls_count>-cnt BETWEEN 2 AND 3.
+        INSERT <ls_count> INTO TABLE lt_new.
+      ENDLOOP.
+
+      lt_cube =  lt_new.
     ENDDO.
 
-    DELETE rt_cube[] WHERE state <> ms_state-active.
+    rv_count = lines( lt_new ).
   ENDMETHOD.
 
 
   METHOD part2.
-    rt_cube = part1(
+    rv_count = part1(
      it_input  = it_input
      im_mode   = 2 ).
-  ENDMETHOD.
-
-
-  METHOD _get_active_count.
-
-    LOOP AT mt_adjacent ASSIGNING FIELD-SYMBOL(<ls_adjacent>).
-
-      ASSIGN mt_cube[ x = is_cube-x + <ls_adjacent>-x
-                      y = is_cube-y + <ls_adjacent>-y
-                      z = is_cube-z + <ls_adjacent>-z
-                      w = is_cube-w + <ls_adjacent>-w ] TO FIELD-SYMBOL(<ls_cube_curr>).
-      CHECK sy-subrc = 0.
-
-      CHECK <ls_cube_curr>-state = ms_state-active.
-      rv_count = rv_count + 1.
-    ENDLOOP.
   ENDMETHOD.
 
 
@@ -191,12 +150,12 @@ CLASS ZCL_ADVENT2020_DAY17 IMPLEMENTATION.
       LOOP AT lt_diff INTO DATA(y).
         LOOP AT lt_diff INTO DATA(z).
           LOOP AT lt_dim_w INTO DATA(w).
-            DATA(ls_adjacent) = VALUE ts_adjacent( x = x
-                                                   y = y
-                                                   z = z
-                                                   w = w ).
+            DATA(ls_adjacent) = VALUE ts_cube( x = x
+                                               y = y
+                                               z = z
+                                               w = w ).
             CHECK ls_adjacent IS NOT INITIAL.
-            APPEND ls_adjacent TO rt_adjacent.
+            INSERT ls_adjacent INTO TABLE rt_adjacent.
           ENDLOOP.
         ENDLOOP.
       ENDLOOP.

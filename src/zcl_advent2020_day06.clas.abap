@@ -7,10 +7,10 @@ CLASS zcl_advent2020_day06 DEFINITION
 
     INTERFACES if_oo_adt_classrun .
 
-    METHODS part1 IMPORTING it_input        TYPE stringtab
+    METHODS part1 IMPORTING it_input        TYPE string_table
                   RETURNING VALUE(rv_count) TYPE i.
 
-    METHODS part2 IMPORTING it_input        TYPE stringtab
+    METHODS part2 IMPORTING it_input        TYPE string_table
                   RETURNING VALUE(rv_count) TYPE i.
 
     METHODS get_1group_count
@@ -24,7 +24,7 @@ CLASS zcl_advent2020_day06 DEFINITION
       RETURNING VALUE(rv_count) TYPE i.
   PROTECTED SECTION.
   PRIVATE SECTION.
-
+    TYPES char1 TYPE c LENGTH 1.
 ENDCLASS.
 
 

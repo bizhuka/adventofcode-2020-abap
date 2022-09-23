@@ -4,13 +4,15 @@ CLASS zcl_advent2020_day05 DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
-
     INTERFACES if_oo_adt_classrun .
+    TYPES char3 TYPE c LENGTH 3.
+    TYPES char7 TYPE c LENGTH 7.
+    TYPES char10 TYPE c LENGTH 10.
 
-    METHODS part1 IMPORTING it_input      TYPE stringtab
+    METHODS part1 IMPORTING it_input      TYPE string_table
                   RETURNING VALUE(rv_max) TYPE i.
 
-    METHODS part2 IMPORTING it_input             TYPE stringtab
+    METHODS part2 IMPORTING it_input             TYPE string_table
                   RETURNING VALUE(rv_my_seat_id) TYPE i.
 
     METHODS get_seat_id IMPORTING iv_raw            TYPE char10
@@ -22,7 +24,16 @@ CLASS zcl_advent2020_day05 DEFINITION
 
   PROTECTED SECTION.
   PRIVATE SECTION.
-
+    CLASS-METHODS base_converter
+      IMPORTING
+        !number         TYPE any
+        !from           TYPE i DEFAULT 10
+        !to             TYPE i DEFAULT 62
+        !alphabet       TYPE csequence OPTIONAL
+      RETURNING
+        VALUE(rv_value) TYPE string
+      RAISING
+        cx_sy_move_cast_error .
 ENDCLASS.
 
 
@@ -39,14 +50,14 @@ CLASS zcl_advent2020_day05 IMPLEMENTATION.
     DATA(lv_binary) = iv_raw.
     REPLACE ALL OCCURRENCES OF: 'F' IN lv_binary WITH '0',
                                 'B' IN lv_binary WITH '1'.
-    rv_row = /ui2/cl_number=>base_converter( number = lv_binary from = 2 to = 10 ).
+    rv_row = base_converter( number = lv_binary from = 2 to = 10 ).
   ENDMETHOD.
 
   METHOD get_column.
     DATA(lv_binary) = iv_raw.
     REPLACE ALL OCCURRENCES OF: 'L' IN lv_binary WITH '0',
                                 'R' IN lv_binary WITH '1'.
-    rv_column = /ui2/cl_number=>base_converter( number = lv_binary from = 2 to = 10 ).
+    rv_column = base_converter( number = lv_binary from = 2 to = 10 ).
   ENDMETHOD.
 
   METHOD get_seat_id.
@@ -75,5 +86,65 @@ CLASS zcl_advent2020_day05 IMPLEMENTATION.
       RETURN.
     ENDLOOP.
   ENDMETHOD.
+
+
+  METHOD base_converter.
+
+    DATA: lv_decimal  TYPE p,
+          lv_alphabet TYPE string,
+          lv_number   TYPE string,
+          lv_length   TYPE i,
+          lv_last     TYPE i,
+          lv_index    TYPE i.
+    CONSTANTS mc_alphabet TYPE string VALUE `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_.~!*{}'();:@&=+$,/?#[]%<>"§|\^`. "#EC NOTEXT
+
+    IF alphabet IS INITIAL.
+      lv_alphabet = mc_alphabet.
+    ELSE.
+      lv_alphabet = alphabet.
+    ENDIF.
+
+    IF from GT strlen( lv_alphabet ) OR to LT 2.
+      RAISE EXCEPTION TYPE cx_sy_move_cast_error.
+    ENDIF.
+
+    IF from NE 10.
+
+      lv_number = number.
+      CONDENSE lv_number.
+
+      lv_length = strlen( lv_number ).
+      lv_last = lv_length - 1.
+      WHILE lv_last GE 0.
+        FIND FIRST OCCURRENCE OF lv_number+lv_last(1) IN lv_alphabet RESPECTING CASE MATCH OFFSET lv_index.
+        IF sy-subrc NE 0.
+          RAISE EXCEPTION TYPE cx_sy_move_cast_error.
+        ENDIF.
+        lv_decimal = lv_decimal + lv_index * ( from ** ( lv_length - lv_last - 1 ) ).
+        lv_last = lv_last - 1.
+      ENDWHILE.
+
+    ELSE.
+      lv_decimal = number.
+    ENDIF.
+
+    IF to NE 10.
+
+      WHILE lv_decimal NE 0.
+        lv_index = lv_decimal MOD to.
+        CONCATENATE lv_alphabet+lv_index(1) rv_value INTO rv_value.
+        lv_decimal = lv_decimal DIV to.
+      ENDWHILE.
+
+      IF rv_value IS INITIAL.
+        rv_value = '0'.
+      ENDIF.
+
+    ELSE.
+      rv_value = lv_decimal.
+      CONDENSE rv_value.
+    ENDIF.
+
+  ENDMETHOD.                    "base_converter
 
 ENDCLASS.

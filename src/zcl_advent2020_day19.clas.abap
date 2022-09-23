@@ -1,146 +1,94 @@
-class ZCL_ADVENT2020_DAY19 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day19 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun.
 
-  types:
-    BEGIN OF ts_rule,
+    TYPES:
+      BEGIN OF ts_rule,
         key   TYPE string,
         val   TYPE string,
+        regex TYPE string,
+      END OF ts_rule.
+    TYPES:
+      tt_rule TYPE HASHED TABLE OF ts_rule WITH UNIQUE KEY key.
 
-        cache01 TYPE stringtab,
+    METHODS part1
+      IMPORTING
+        it_input        TYPE string_table
+        iv_replace      TYPE abap_bool OPTIONAL
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34.
 
-        regex02 TYPE STRING,
-      END OF ts_rule .
-  types:
-    tt_rule TYPE HASHED TABLE OF ts_rule WITH UNIQUE KEY key .
+    METHODS part2
+      IMPORTING
+        it_input        TYPE string_table
+        iv_replace      TYPE abap_bool
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34.
 
-  methods PART1
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
-  methods PART2
-    importing
-      !IT_INPUT type STRINGTAB
-      !IV_REPLACE type ABAP_BOOL
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
-  methods GET_RULE_01
-    importing
-      !IV_KEY type CSEQUENCE
-    returning
-      value(RT_RULE) type STRINGTAB .
+    METHODS get_rule
+      IMPORTING
+        iv_key          TYPE csequence
+        iv_depth        TYPE i DEFAULT 20
+      RETURNING
+        VALUE(rv_regex) TYPE string.
   PROTECTED SECTION.
 
-private section.
+  PRIVATE SECTION.
 
-  data MT_RULE type TT_RULE .
-  data MT_CHECK type STRINGTAB .
+    DATA mt_rule TYPE tt_rule.
+    DATA mt_check TYPE string_table.
 
-  methods PARSE_01
-    importing
-      !IT_INPUT type STRINGTAB .
-  methods GET_RULE_02
-    importing
-      !IV_KEY type CSEQUENCE
-      !IV_DEPTH type I default 20
-    returning
-      value(RV_REGEX) type STRING .
+    METHODS parse
+      IMPORTING
+        it_input TYPE string_table.
 ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY19 IMPLEMENTATION.
-
-
-  METHOD get_rule_01.
-    ASSIGN mt_rule[ key = iv_key ] TO FIELD-SYMBOL(<ls_rule>).
-    IF sy-subrc = 0 AND <ls_rule>-cache01[] IS NOT INITIAL.
-      rt_rule = <ls_rule>-cache01[].
-      RETURN.
-    ENDIF.
-
-    INSERT VALUE #( key = iv_key )  INTO TABLE mt_rule[] ASSIGNING <ls_rule>.
-
-**********************************************************************
-**********************************************************************
-    SPLIT iv_key AT ` ` INTO DATA(lv_key1)
-                             DATA(lv_key2)
-                             DATA(lv_key3).
-    IF lv_key2 IS NOT INITIAL.
-      DATA(lt_val1) = get_rule_01( lv_key1 ).
-      DATA(lt_val2) = get_rule_01( lv_key2 ).
-      DATA(lt_val3) = COND #( WHEN lv_key3 IS NOT INITIAL THEN get_rule_01( lv_key3 )
-                                                          ELSE VALUE #( ( ) ) ).
-      LOOP AT lt_val1 INTO DATA(lv_val1).
-        LOOP AT lt_val2 INTO DATA(lv_val2).
-          LOOP AT lt_val3 INTO DATA(lv_val3).
-            APPEND |{ lv_val1 }{ lv_val2 }{ lv_val3 }| TO rt_rule[].
-          ENDLOOP.
-        ENDLOOP.
-      ENDLOOP.
-
-    ELSEIF <ls_rule>-val CP `* | *`.
-      SPLIT <ls_rule>-val AT ` | ` INTO DATA(lv_keys1)
-                                        DATA(lv_keys2).
-
-      DATA(lt_vals1) = get_rule_01( lv_keys1 ).
-      DATA(lt_vals2) = get_rule_01( lv_keys2 ).
-
-      APPEND LINES OF lt_vals1 TO rt_rule[].
-      APPEND LINES OF lt_vals2 TO rt_rule[].
-    ELSE.
-      rt_rule = get_rule_01( <ls_rule>-val ).
-    ENDIF.
-
-    <ls_rule>-cache01[] = rt_rule[].
-  ENDMETHOD.
-
-
-  METHOD get_rule_02.
+CLASS zcl_advent2020_day19 IMPLEMENTATION.
+  METHOD get_rule.
     IF iv_depth = 0.
       rv_regex = ''.
       RETURN.
     ENDIF.
 
     ASSIGN mt_rule[ key = iv_key ] TO FIELD-SYMBOL(<ls_rule>).
-    IF sy-subrc = 0 AND <ls_rule>-regex02 IS NOT INITIAL.
-      rv_regex = <ls_rule>-regex02.
+    IF sy-subrc = 0 AND <ls_rule>-regex IS NOT INITIAL.
+      rv_regex = <ls_rule>-regex.
       RETURN.
     ENDIF.
 
-    INSERT VALUE #( key = iv_key )  INTO TABLE mt_rule[] ASSIGNING <ls_rule>.
+    INSERT VALUE #( key = iv_key
+                    val = iv_key )  INTO TABLE mt_rule[] ASSIGNING <ls_rule>.
 
 **********************************************************************
 **********************************************************************
-    SPLIT iv_key AT ` ` INTO DATA(lv_key1)
-                             DATA(lv_key2)
-                             DATA(lv_key3).
-    IF lv_key2 IS NOT INITIAL.
-      DATA(lv_regex1) = get_rule_02( iv_key = lv_key1 iv_depth = iv_depth - 1 ).
-      DATA(lv_regex2) = get_rule_02( iv_key = lv_key2 iv_depth = iv_depth - 1 ).
-      DATA(lv_regex3) = COND #( WHEN lv_key3 IS NOT INITIAL THEN get_rule_02( iv_key = lv_key3 iv_depth = iv_depth - 1  )
-                                                            ELSE || ).
-      rv_regex = |{ lv_regex1 }{ lv_regex2 }{ lv_regex3 }|.
-
+    IF <ls_rule>-val CP '"*"'.
+      <ls_rule>-regex = <ls_rule>-val+1(1).
     ELSEIF <ls_rule>-val CP `* | *`.
       SPLIT <ls_rule>-val AT ` | ` INTO DATA(lv_keys1)
                                         DATA(lv_keys2).
 
-      DATA(lv_part1) = get_rule_02( iv_key = lv_keys1 iv_depth = iv_depth - 1 ).
-      DATA(lv_part2) = get_rule_02( iv_key = lv_keys2 iv_depth = iv_depth - 1 ).
+      DATA(lv_part1) = get_rule( iv_key = lv_keys1 iv_depth = iv_depth - 1 ).
+      DATA(lv_part2) = get_rule( iv_key = lv_keys2 iv_depth = iv_depth - 1 ).
 
-      rv_regex = `((` && lv_part1 && `)|(` && lv_part2 && `))`.
+      <ls_rule>-regex = `((` && lv_part1 && `)|(` && lv_part2 && `))`.
+    ELSEIF <ls_rule>-val CS ` `.
+      SPLIT <ls_rule>-val AT ` ` INTO TABLE DATA(lt_key).
+      LOOP AT lt_key ASSIGNING FIELD-SYMBOL(<lv_key>).
+        <lv_key> = get_rule( iv_key = <lv_key> iv_depth = iv_depth - 1 ).
+      ENDLOOP.
+      <ls_rule>-regex = |{ concat_lines_of( table = lt_key ) }|.
     ELSE.
-      rv_regex = get_rule_02( iv_key = <ls_rule>-val iv_depth = iv_depth - 1 ).
+      <ls_rule>-regex = get_rule( iv_key = <ls_rule>-val iv_depth = iv_depth - 1 ).
     ENDIF.
 
-    <ls_rule>-regex02 = rv_regex.
+    rv_regex = <ls_rule>-regex.
   ENDMETHOD.
 
 
@@ -153,8 +101,7 @@ CLASS ZCL_ADVENT2020_DAY19 IMPLEMENTATION.
     out->write( |{ lv_count1 } { lv_count2 }| ).
   ENDMETHOD.
 
-
-  METHOD parse_01.
+  METHOD parse.
     mt_rule  = VALUE #( ).
     mt_check = VALUE #( ).
     LOOP AT it_input INTO DATA(lv_input) WHERE table_line IS NOT INITIAL.
@@ -162,8 +109,7 @@ CLASS ZCL_ADVENT2020_DAY19 IMPLEMENTATION.
                                   DATA(lv_value).
       IF lv_value IS NOT INITIAL.
         INSERT VALUE #( key     = lv_key
-                        val     = lv_value
-                        cache01 = COND #( WHEN lv_value CP `"*"` THEN VALUE #( ( |{ lv_value+1(1) }| ) ) )  ) INTO TABLE mt_rule.
+                        val     = lv_value ) INTO TABLE mt_rule.
         CONTINUE.
       ENDIF.
 
@@ -173,61 +119,32 @@ CLASS ZCL_ADVENT2020_DAY19 IMPLEMENTATION.
 
 
   METHOD part1.
-    parse_01( it_input ).
-
-    DATA(lt_all) = get_rule_01( `0` ).
-    SORT lt_all BY table_line.
-
-    LOOP AT mt_check INTO DATA(lv_line).
-      READ TABLE lt_all TRANSPORTING NO FIELDS BINARY SEARCH
-       WITH KEY table_line = lv_line.
-      CHECK sy-subrc = 0.
-
-      rv_count = rv_count + 1.
-    ENDLOOP.
-  ENDMETHOD.
-
-
-  METHOD part2.
-    mt_rule  = VALUE #( ).
-    mt_check = VALUE #( ).
-    LOOP AT it_input INTO DATA(lv_input) WHERE table_line IS NOT INITIAL.
-      SPLIT lv_input AT `: ` INTO DATA(lv_key)
-                                  DATA(lv_value).
-      IF lv_value IS NOT INITIAL.
-        INSERT VALUE #( key     = lv_key
-                        val     = lv_value
-                        regex02 = COND #( WHEN lv_value CP `"*"` THEN |({ lv_value+1(1) })| ) ) INTO TABLE mt_rule.
-        CONTINUE.
-      ENDIF.
-
-      APPEND lv_input TO mt_check.
-    ENDLOOP.
-**********************************************************************
-**********************************************************************
+    parse( it_input ).
 
     IF iv_replace = abap_true.
-      get_rule_02( '42' ).
-      get_rule_02( '31' ).
+*      get_rule( '42' ).
+*      get_rule( '31' ).
 
-
-      BREAK-POINT.
       mt_rule[ key = `8` ]-val  = `42 | 42 8`.
-      get_rule_02( '8' ).
+*      get_rule( '8' ).
 
       mt_rule[ key = `11` ]-val = `42 31 | 42 11 31`.
-      get_rule_02( '11' ).
+*      get_rule( '11' ).
     ENDIF.
 
-**********************************************************************
-**********************************************************************
-    DATA(lv_regex) = |^{ get_rule_02( `0` ) }$|.
+
+    DATA(lv_regex) = |^{ get_rule( `0` ) }$|.
 
     LOOP AT mt_check INTO DATA(lv_line).
       FIND REGEX lv_regex IN lv_line.
       CHECK sy-subrc = 0.
 
-      rv_count = rv_count + 1.
+      rv_count += 1.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD part2.
+    rv_count = part1( it_input   = it_input
+                      iv_replace = iv_replace ).
   ENDMETHOD.
 ENDCLASS.

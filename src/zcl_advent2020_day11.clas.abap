@@ -8,98 +8,75 @@ CLASS zcl_advent2020_day11 DEFINITION
     INTERFACES if_oo_adt_classrun .
 
     TYPES:
-      BEGIN OF ts_adjacent,
-        x       TYPE i,
-        shift_x TYPE i,
-        y       TYPE i,
-        shift_y TYPE i,
-        apply   TYPE abap_bool,
-      END OF ts_adjacent .
-    TYPES:
-      tt_adjacent TYPE STANDARD TABLE OF ts_adjacent WITH DEFAULT KEY .
+      BEGIN OF ts_shift,
+        x TYPE i,
+        y TYPE i,
+      END OF ts_shift,
+      tt_shift   TYPE STANDARD TABLE OF ts_shift WITH DEFAULT KEY,
+
+      char1      TYPE c LENGTH 1,
+      int4_table TYPE STANDARD TABLE OF i WITH DEFAULT KEY,
+
+      BEGIN OF ts_2dim,
+        x     TYPE i,
+        y     TYPE i,
+        seat  TYPE char1,
+        count TYPE i,
+      END OF ts_2dim,
+      tt_2dim TYPE HASHED TABLE OF ts_2dim WITH UNIQUE KEY x y.
 
     CONSTANTS:
       BEGIN OF ms_seat,
         empty    TYPE char1 VALUE 'L',
         occupied TYPE char1 VALUE '#',
         floor    TYPE char1 VALUE '.',
-      END OF ms_seat .
+      END OF ms_seat,
+
+      mc_infinite TYPE i VALUE 1000000.
 
     METHODS constructor .
     METHODS part1
       IMPORTING
-        it_input       TYPE stringtab
-        iv_times       TYPE i OPTIONAL
-        im_mode        TYPE i DEFAULT 1
-        iv_occupied    TYPE i DEFAULT 4
-        rr_occupied    TYPE REF TO i OPTIONAL
+        it_input        TYPE string_table
+        iv_times        TYPE i
+        im_mode         TYPE i DEFAULT 1
+        iv_occupied     TYPE i DEFAULT 4
       RETURNING
-        VALUE(rv_2dim) TYPE string.
+        VALUE(rv_count) TYPE i.
     METHODS part2
       IMPORTING
-                it_input       TYPE stringtab
-                rr_occupied    TYPE REF TO i OPTIONAL
-                iv_times       TYPE i OPTIONAL
-      RETURNING VALUE(rv_2dim) TYPE string.
+                it_input        TYPE string_table
+                iv_times        TYPE i
+      RETURNING VALUE(rv_count) TYPE i.
   PROTECTED SECTION.
 
-private section.
+  PRIVATE SECTION.
 
-  data MT_ADJACENT type TT_ADJACENT .
-  data MV_2DIM type STRING .
-  data MV_ROW_COUNT type I .
-  data MV_COL_COUNT type I .
+    DATA mt_shift TYPE tt_shift.
+    DATA mt_2dim TYPE tt_2dim.
+    DATA mv_mode TYPE i.
 
-  methods _GET_2DIM
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_2DIM) type STRING .
-  methods _GET_OCCUPIED_COUNT
-    importing
-      !IV_INDEX type I
-      !IM_MODE type I
-    returning
-      value(RV_OCCUPIED_COUNT) type I .
-  methods _GET_X_Y
-    importing
-      !IV_INDEX type I
-    exporting
-      !X type I
-      !Y type I
-      !S type CHAR1
-    raising
-      CX_PARAMETER_INVALID .
-  methods _GET_INDEX
-    importing
-      !_X type I
-      !_Y type I
-    returning
-      value(_RV_INDEX) type I
-    raising
-      CX_PARAMETER_INVALID .
+    METHODS _get_2dim
+      IMPORTING
+        it_input       TYPE string_table
+      RETURNING
+        VALUE(rt_2dim) TYPE tt_2dim .
+
+    METHODS _calc_occupied_count .
 ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY11 IMPLEMENTATION.
+CLASS zcl_advent2020_day11 IMPLEMENTATION.
 
 
   METHOD constructor.
-    mt_adjacent = VALUE #(
-      ( x = -1 y = -1 )
-      ( x = -1 y = 0  )
-      ( x = -1 y = 1  )
-      ( x = 0  y = -1 )
-      ( x = 0  y = 1  )
-      ( x = 1  y = -1 )
-      ( x = 1  y = 0  )
-      ( x = 1  y = 1  )
-    ).
-    LOOP AT mt_adjacent ASSIGNING FIELD-SYMBOL(<ls_adjacent>).
-      <ls_adjacent>-shift_x = <ls_adjacent>-x.
-      <ls_adjacent>-shift_y = <ls_adjacent>-y.
-      <ls_adjacent>-apply   = abap_true.
+    DATA(t_shift) = VALUE int4_table( ( -1 ) ( 0 ) ( 1 ) ).
+    LOOP AT t_shift INTO DATA(x).
+      LOOP AT t_shift INTO DATA(y).
+        CHECK x <> 0 OR y <> 0.
+        INSERT VALUE #( x = x y = y ) INTO TABLE mt_shift.
+      ENDLOOP.
     ENDLOOP.
   ENDMETHOD.
 
@@ -107,148 +84,98 @@ CLASS ZCL_ADVENT2020_DAY11 IMPLEMENTATION.
   METHOD if_oo_adt_classrun~main.
     DATA(lt_input)   = NEW lcl_input(  )->mt_input.
 
-    DATA(lv_count_1) = NEW i( ).
-    DATA(lv_count_2) = NEW i( ).
-    part1( it_input    = lt_input
-           iv_times    = -1
-           rr_occupied = lv_count_1 ).
-    part2( it_input    = lt_input
-           iv_times    = -1
-           rr_occupied = lv_count_2 ).
+    DATA(lv_count_1) = part1( it_input = lt_input
+                              iv_times = mc_infinite ).
+    DATA(lv_count_2) = part2( it_input = lt_input
+                              iv_times = mc_infinite ).
     CHECK out IS NOT INITIAL.
-    out->write( |{ lv_count_1->* } - { lv_count_2->* }| ).
+    out->write( |{ lv_count_1 } - { lv_count_2 }| ).
   ENDMETHOD.
 
 
   METHOD part1.
-    rv_2dim = _get_2dim( it_input ).
+    mt_2dim = _get_2dim( it_input ).
 
-    DO.
-      IF sy-index = iv_times + 1. " 0 for no loop, -1 for infinite loop
-        EXIT.
-      ENDIF.
+    DO iv_times TIMES.
+      _calc_occupied_count( ).
 
-      DATA(lv_result)      = rv_2dim.
-      DATA(lv_rule_from_l) = xsdbool( sy-index MOD 2 = 1 ).
-      DATA(lv_occupied)    = 0.
+      DATA(lv_changed) = abap_false.
+      LOOP AT mt_2dim ASSIGNING FIELD-SYMBOL(<ls_2dim>) WHERE seat <> ms_seat-floor.
+        DATA(lv_new_seat) = <ls_2dim>-seat.
+        CASE <ls_2dim>-seat.
+          WHEN ms_seat-empty.
+            IF <ls_2dim>-count = 0.
+              lv_new_seat = ms_seat-occupied.
+            ENDIF.
 
-      DO strlen( rv_2dim ) TIMES.
-        DATA(lv_index) = sy-index - 1.
-        DATA(lv_seat)  = CONV char1( rv_2dim+lv_index(1) ).
-        IF lv_seat <> ms_seat-floor.
-          DATA(lv_occupied_count) = _get_occupied_count( iv_index = lv_index + 1
-                                                         im_mode  = im_mode ).
-          CASE lv_rule_from_l.
-            WHEN abap_true.
-              IF lv_seat = ms_seat-empty AND lv_occupied_count = 0.
-                lv_seat = ms_seat-occupied.
-              ENDIF.
+          WHEN ms_seat-occupied.
+            IF <ls_2dim>-count >= iv_occupied.
+              lv_new_seat = ms_seat-empty.
+            ENDIF.
+        ENDCASE.
 
-            WHEN abap_false.
-              IF lv_seat = ms_seat-occupied AND lv_occupied_count >= iv_occupied.
-                lv_seat = ms_seat-empty.
-              ENDIF.
-          ENDCASE.
+        " For next iteration
+        <ls_2dim>-count = 0.
 
-          IF lv_seat = ms_seat-occupied.
-            lv_occupied = lv_occupied + 1.
-          ENDIF.
-        ENDIF.
-
-        REPLACE SECTION OFFSET lv_index LENGTH 1 OF lv_result WITH lv_seat.
-      ENDDO.
-
-      IF rr_occupied IS NOT INITIAL.
-        rr_occupied->* = lv_occupied.
-      ENDIF.
+        CHECK <ls_2dim>-seat <> lv_new_seat.
+        <ls_2dim>-seat = lv_new_seat.
+        lv_changed = abap_true.
+      ENDLOOP.
 
       " Already is Zen
-      IF rv_2dim = lv_result.
-        EXIT.
-      ENDIF.
-      mv_2dim = rv_2dim = lv_result.
+      CHECK lv_changed <> abap_true.
+      rv_count = REDUCE #( INIT s = 0
+                           FOR <line> IN mt_2dim
+                           WHERE ( seat = ms_seat-occupied )
+                           NEXT s += 1 ).
+      RETURN.
     ENDDO.
   ENDMETHOD.
 
 
   METHOD part2.
-    rv_2dim = part1(
+    mv_mode = 2.
+    rv_count = part1(
              it_input    = it_input
              iv_times    = iv_times
-             im_mode     = 2
-             iv_occupied = 5
-             rr_occupied = rr_occupied
-      ).
+             iv_occupied = 5 ).
   ENDMETHOD.
 
 
   METHOD _get_2dim.
-    mv_row_count = lines( it_input ).
-    mv_col_count = strlen( it_input[ 1 ] ).
-    rv_2dim      = mv_2dim = concat_lines_of( table = it_input ).
-  ENDMETHOD.
+    LOOP AT it_input INTO DATA(lv_input).
+      DATA(y) = sy-tabix.
+      DO strlen( lv_input ) TIMES.
+        DATA(x) = sy-index.
 
-
-METHOD _get_index.
- _get_index.
-ENDMETHOD.
-
-
-  METHOD _get_occupied_count.
-    LOOP AT mt_adjacent ASSIGNING FIELD-SYMBOL(<ls_adjacent>).
-      <ls_adjacent>-x     = <ls_adjacent>-shift_x.
-      <ls_adjacent>-y     = <ls_adjacent>-shift_y.
-      <ls_adjacent>-apply = abap_true.
+        DATA(lv_off)  = x - 1.
+        INSERT VALUE #( x     = x
+                        y     = y
+                        seat  = lv_input+lv_off(1) ) INTO TABLE rt_2dim[].
+      ENDDO.
     ENDLOOP.
-
-***    _get_x_y( EXPORTING iv_index = iv_index
-***              IMPORTING x        = DATA(x)
-***                        y        = DATA(y) ).
-    DATA: x TYPE i, y TYPE i, _rv_index TYPE i.
-    _get_x_y.
-
-    DO.
-      LOOP AT mt_adjacent ASSIGNING <ls_adjacent> WHERE apply = abap_true.
-        DATA(lv_tabix) = sy-tabix.
-
-        TRY.
-***            DATA(lv_index) = _get_index( _x = x + <ls_adjacent>-x
-***                                         _y = y + <ls_adjacent>-y ) - 1.
-            DATA(_x) = x + <ls_adjacent>-x.
-            DATA(_y) = y + <ls_adjacent>-y.
-            _get_index.
-            _rv_index = _rv_index - 1.
-
-          CATCH cx_parameter_invalid.
-            CLEAR <ls_adjacent>-apply.
-            CONTINUE.
-        ENDTRY.
-
-        DATA(lv_seat) = mv_2dim+_rv_index(1).
-
-        IF im_mode = 2 AND lv_seat = ms_seat-floor.
-          <ls_adjacent>-x = <ls_adjacent>-x + <ls_adjacent>-shift_x.
-          <ls_adjacent>-y = <ls_adjacent>-y + <ls_adjacent>-shift_y.
-        ELSE.
-          CLEAR <ls_adjacent>-apply.
-        ENDIF.
-
-        CHECK lv_seat = ms_seat-occupied.
-        rv_occupied_count = rv_occupied_count + 1.
-      ENDLOOP.
-
-      IF im_mode = 1 OR sy-subrc <> 0.
-        RETURN.
-      ENDIF.
-    ENDDO.
   ENDMETHOD.
 
 
-METHOD _get_x_y.
-  _get_x_y.
+  METHOD _calc_occupied_count.
+    LOOP AT mt_2dim ASSIGNING FIELD-SYMBOL(<ls_2dim>) WHERE seat = ms_seat-occupied.
+      LOOP AT mt_shift ASSIGNING FIELD-SYMBOL(<ls_shift>).
+        DATA(x) = <ls_2dim>-x + <ls_shift>-x.
+        DATA(y) = <ls_2dim>-y + <ls_shift>-y.
 
-  CHECK s IS REQUESTED.
-  DATA(lv_index) = iv_index - 1.
-  s = mv_2dim+lv_index(1).
-ENDMETHOD.
+        ASSIGN mt_2dim[ x = x y = y ] TO FIELD-SYMBOL(<ls_result>).
+        CHECK sy-subrc = 0.
+
+        WHILE mv_mode = 2 AND <ls_result> IS ASSIGNED AND <ls_result>-seat = ms_seat-floor.
+          x += <ls_shift>-x.
+          y += <ls_shift>-y.
+          UNASSIGN <ls_result>.
+          ASSIGN mt_2dim[ x = x y = y ] TO <ls_result>.
+        ENDWHILE.
+
+        CHECK <ls_result> IS ASSIGNED.
+        <ls_result>-count += 1.
+      ENDLOOP.
+    ENDLOOP.
+  ENDMETHOD.
 ENDCLASS.

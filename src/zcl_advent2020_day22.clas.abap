@@ -7,6 +7,7 @@ CLASS zcl_advent2020_day22 DEFINITION
 
     INTERFACES if_oo_adt_classrun .
     TYPES:
+      numc3         TYPE n LENGTH 3,
       num_table     TYPE STANDARD TABLE OF numc3 WITH EMPTY KEY,
       num_table_ref TYPE REF TO num_table.
     TYPES:
@@ -14,12 +15,12 @@ CLASS zcl_advent2020_day22 DEFINITION
 
     METHODS part1
       IMPORTING
-        !it_input       TYPE stringtab
+        !it_input       TYPE string_table
       RETURNING
         VALUE(rv_count) TYPE decfloat34 .
     METHODS part2
       IMPORTING
-        !it_input       TYPE stringtab
+        !it_input       TYPE string_table
       RETURNING
         VALUE(rv_count) TYPE decfloat34 .
   PROTECTED SECTION.
@@ -28,7 +29,7 @@ CLASS zcl_advent2020_day22 DEFINITION
 
     METHODS _read_cards
       IMPORTING
-        !it_input   TYPE stringtab
+        !it_input   TYPE string_table
       EXPORTING
         !et_player1 TYPE num_table
         !et_player2 TYPE num_table .

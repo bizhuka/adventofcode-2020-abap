@@ -7,7 +7,8 @@ CLASS zcl_advent2020_day18 DEFINITION
 
     INTERFACES if_oo_adt_classrun .
 
-    TYPES: BEGIN OF ts_oper,
+    TYPES: char1 TYPE c LENGTH 1,
+           BEGIN OF ts_oper,
              ord  TYPE i,
              oper TYPE char1,
            END OF ts_oper,
@@ -24,12 +25,12 @@ CLASS zcl_advent2020_day18 DEFINITION
     DATA mt_queue TYPE tt_queue.
     METHODS part1
       IMPORTING
-        !it_input       TYPE stringtab
+        !it_input       TYPE string_table
       RETURNING
         VALUE(rv_count) TYPE decfloat34 .
     METHODS part2
       IMPORTING
-        !it_input       TYPE stringtab
+        !it_input       TYPE string_table
       RETURNING
         VALUE(rv_count) TYPE decfloat34 .
   PROTECTED SECTION.

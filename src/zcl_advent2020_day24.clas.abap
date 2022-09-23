@@ -1,66 +1,67 @@
 CLASS zcl_advent2020_day24 DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
 
-    INTERFACES if_oo_adt_classrun .
+    INTERFACES if_oo_adt_classrun.
 
     CONSTANTS:
       BEGIN OF ms_color,
         white TYPE abap_bool VALUE abap_false,
         black TYPE abap_bool VALUE abap_true,
-      END OF ms_color .
+      END OF ms_color.
 
     TYPES:
+      char2 TYPE c LENGTH 2,
       BEGIN OF ts_adjacent,
         dir TYPE char2,
         x   TYPE i,
         y   TYPE i,
         z   TYPE i,
-      END OF ts_adjacent .
+      END OF ts_adjacent.
     TYPES:
-      tt_adjacent TYPE HASHED TABLE OF ts_adjacent WITH UNIQUE KEY dir .
+      tt_adjacent TYPE HASHED TABLE OF ts_adjacent WITH UNIQUE KEY dir.
     TYPES:
       BEGIN OF ts_cube,
         x     TYPE i,
         y     TYPE i,
         z     TYPE i,
         color TYPE abap_bool,
-      END OF ts_cube .
+      END OF ts_cube.
     TYPES:
-      tt_cube TYPE HASHED TABLE OF ts_cube WITH UNIQUE KEY x y z .
+      tt_cube TYPE HASHED TABLE OF ts_cube WITH UNIQUE KEY x y z.
 
-    DATA mt_adjacent TYPE tt_adjacent .
-    DATA mt_cube TYPE tt_cube .
+    DATA mt_adjacent TYPE tt_adjacent.
+    DATA mt_cube TYPE tt_cube.
 
-    METHODS constructor .
+    METHODS constructor.
     METHODS part1
       IMPORTING
         !it_input       TYPE stringtab
       RETURNING
-        VALUE(rv_count) TYPE decfloat34 .
+        VALUE(rv_count) TYPE decfloat34.
     METHODS part2
       IMPORTING
         !it_input       TYPE stringtab
         !iv_days        TYPE i
       RETURNING
-        VALUE(rv_count) TYPE decfloat34 .
+        VALUE(rv_count) TYPE decfloat34.
   PROTECTED SECTION.
 
-private section.
+  PRIVATE SECTION.
 
-  methods _GET_BLACK_COUNT
-    importing
-      !IS_CUBE type TS_CUBE
-    returning
-      value(RV_COUNT) type I .
+    METHODS _get_black_count
+      IMPORTING
+        !is_cube        TYPE ts_cube
+      RETURNING
+        VALUE(rv_count) TYPE i.
 ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY24 IMPLEMENTATION.
+CLASS zcl_advent2020_day24 IMPLEMENTATION.
 
 
   METHOD constructor.

@@ -1,22 +1,22 @@
-class ZCL_ADVENT2020_DAY00 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day00 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun .
 
-  methods PART1
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
-  methods PART2
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
+    METHODS part1
+      IMPORTING
+        it_input        TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34 .
+    METHODS part2
+      IMPORTING
+        it_input        TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34 .
   PROTECTED SECTION.
 
   PRIVATE SECTION.
@@ -24,7 +24,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY00 IMPLEMENTATION.
+CLASS zcl_advent2020_day00 IMPLEMENTATION.
 
 
   METHOD if_oo_adt_classrun~main.

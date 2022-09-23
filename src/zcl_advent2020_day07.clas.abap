@@ -7,10 +7,10 @@ CLASS zcl_advent2020_day07 DEFINITION
 
     INTERFACES if_oo_adt_classrun .
 
-    METHODS part1 IMPORTING it_input        TYPE stringtab
+    METHODS part1 IMPORTING it_input        TYPE string_table
                   RETURNING VALUE(rv_count) TYPE i.
 
-    METHODS part2 IMPORTING it_input        TYPE stringtab
+    METHODS part2 IMPORTING it_input        TYPE string_table
                   RETURNING VALUE(rv_count) TYPE i.
 
     TYPES: BEGIN OF ts_sub,
@@ -33,7 +33,7 @@ CLASS zcl_advent2020_day07 DEFINITION
     DATA mt_rule TYPE zcl_advent2020_day07=>tt_rule.
     METHODS _init_rules
       IMPORTING
-        it_input     TYPE stringtab
+        it_input     TYPE string_table
         iv_count_sub TYPE abap_bool OPTIONAL.
 
     METHODS _count_01

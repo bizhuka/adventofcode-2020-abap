@@ -18,21 +18,21 @@ CLASS lcl_test IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD part1.
-    DATA(lt_input) = VALUE stringtab(
+    DATA(lt_input) = VALUE string_table(
         ( |.#.| )
         ( |..#| )
         ( |###| ) ).
 
-    DATA(ra) = cut->get_cube(
+    DATA(ra) = cut->get_active_cube(
        iv_z     = -1
        it_input = VALUE #( ( |#..| )
                            ( |..#| )
                            ( |.#.| ) ) ).
-    DATA(rb) = cut->get_cube(
+    DATA(rb) = cut->get_active_cube(
        it_input = VALUE #( ( |#.#| )
                            ( |.##| )
                            ( |.#.| ) ) ).
-    DATA(rc) = cut->get_cube(
+    DATA(rc) = cut->get_active_cube(
        iv_z     = 1
        it_input = VALUE #( ( |#..| )
                            ( |..#| )
@@ -41,26 +41,25 @@ CLASS lcl_test IMPLEMENTATION.
     INSERT LINES OF ra INTO TABLE rabc.
     INSERT LINES OF rc INTO TABLE rabc.
     INSERT LINES OF rb INTO TABLE rabc.
-    DELETE rabc WHERE state <> cut->ms_state-active.
 
     cl_abap_unit_assert=>assert_equals(
-      act = lines( cut->part1( it_input = lt_input
-                               iv_cycle = 1 ) )
+      act = cut->part1( it_input = lt_input
+                        iv_cycle = 1 )
       exp = lines( rabc ) ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = lines( cut->part1( lt_input ) )
+      act = cut->part1( lt_input )
       exp = 112 ).
   ENDMETHOD.
 
   METHOD part2.
-    DATA(lt_input) = VALUE stringtab(
+    DATA(lt_input) = VALUE string_table(
         ( |.#.| )
         ( |..#| )
         ( |###| ) ).
 
     cl_abap_unit_assert=>assert_equals(
-      act = lines( cut->part2( lt_input ) )
+      act = cut->part2( lt_input )
       exp = 848 ).
   ENDMETHOD.
 

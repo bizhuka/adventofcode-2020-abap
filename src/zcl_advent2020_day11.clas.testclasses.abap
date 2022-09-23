@@ -7,7 +7,6 @@ CLASS lcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT
   PRIVATE SECTION.
     DATA cut      TYPE REF TO zcl_advent2020_day11.
     METHODS setup.
-    METHODS index_x_y     FOR TESTING.
     METHODS part1         FOR TESTING.
     METHODS part2         FOR TESTING.
 ENDCLASS.
@@ -19,106 +18,6 @@ CLASS zcl_advent2020_day11 DEFINITION LOCAL FRIENDS lcl_test.
 CLASS lcl_test IMPLEMENTATION.
   METHOD setup.
     cut = NEW #( ).
-  ENDMETHOD.
-
-  METHOD index_x_y.
-    cut->_get_2dim( VALUE #(
-     ( |1234| )
-     ( |5678| )
-     ( |9ABC| ) ) ).
-
-**********************************************************************
-    cut->_get_x_y( EXPORTING iv_index = 1
-                   IMPORTING x        = DATA(x)
-                             y        = DATA(y)
-                             s        = DATA(lv_char) ).
-    cl_abap_unit_assert=>assert_equals(
-      act = |{ x }-{ y }-{ lv_char }|
-      exp = |1-1-1| ).
-    cl_abap_unit_assert=>assert_equals(
-      act = cut->_get_index( _x = x _y = y )
-      exp = 1 ).
-**********************************************************************
-    cut->_get_x_y( EXPORTING iv_index = 2
-                   IMPORTING x        = x
-                             y        = y
-                             s        = lv_char ).
-    cl_abap_unit_assert=>assert_equals(
-      act = |{ x }-{ y }-{ lv_char }|
-      exp = |1-2-2| ).
-    cl_abap_unit_assert=>assert_equals(
-      act = cut->_get_index( _x = x _y = y )
-      exp = 2 ).
-**********************************************************************
-    cut->_get_x_y( EXPORTING iv_index = 7
-                   IMPORTING x        = x
-                             y        = y
-                             s        = lv_char ).
-    cl_abap_unit_assert=>assert_equals(
-      act = |{ x }-{ y }-{ lv_char }|
-      exp = |2-3-7| ).
-    cl_abap_unit_assert=>assert_equals(
-      act = cut->_get_index( _x = x _y = y )
-      exp = 7 ).
-**********************************************************************
-    cut->_get_x_y( EXPORTING iv_index = 10
-                   IMPORTING x        = x
-                             y        = y
-                             s        = lv_char ).
-    cl_abap_unit_assert=>assert_equals(
-      act = |{ x }-{ y }-{ lv_char }|
-      exp = |3-2-A| ).
-    cl_abap_unit_assert=>assert_equals(
-      act = cut->_get_index( _x = x _y = y )
-      exp = 10 ).
-**********************************************************************
-    cut->_get_x_y( EXPORTING iv_index = 12
-                   IMPORTING x        = x
-                             y        = y
-                             s        = lv_char ).
-    cl_abap_unit_assert=>assert_equals(
-      act = |{ x }-{ y }-{ lv_char }|
-      exp = |3-4-C| ).
-    cl_abap_unit_assert=>assert_equals(
-      act = cut->_get_index( _x = x _y = y )
-      exp = 12 ).
-**********************************************************************
-    TRY.
-        cut->_get_x_y( iv_index = 0 ).
-        cl_abap_unit_assert=>fail( ).
-      CATCH cx_parameter_invalid.
-    ENDTRY.
-    TRY.
-        cut->_get_x_y( iv_index = -1 ).
-        cl_abap_unit_assert=>fail( ).
-      CATCH cx_parameter_invalid.
-    ENDTRY.
-    TRY.
-        cut->_get_x_y( iv_index = 13 ).
-        cl_abap_unit_assert=>fail( ).
-      CATCH cx_parameter_invalid.
-    ENDTRY.
-**********************************************************************
-    TRY.
-        cut->_get_index( _x = 0 _y = 2 ).
-        cl_abap_unit_assert=>fail( ).
-      CATCH cx_parameter_invalid.
-    ENDTRY.
-    TRY.
-        cut->_get_index( _x = 4 _y = 2 ).
-        cl_abap_unit_assert=>fail( ).
-      CATCH cx_parameter_invalid.
-    ENDTRY.
-    TRY.
-        cut->_get_index( _x = 2 _y = 0 ).
-        cl_abap_unit_assert=>fail( ).
-      CATCH cx_parameter_invalid.
-    ENDTRY.
-    TRY.
-        cut->_get_index( _x = 2 _y = 5 ).
-        cl_abap_unit_assert=>fail( ).
-      CATCH cx_parameter_invalid.
-    ENDTRY.
   ENDMETHOD.
 
   METHOD part1.
@@ -199,15 +98,13 @@ CLASS lcl_test IMPLEMENTATION.
                 it_input  = lt_input
                 iv_times  = lv_step )
         exp = cut->part1(
-                it_input  = <lt_step> ) ).
+                it_input  = <lt_step>
+                iv_times  = 0 ) ).
     ENDLOOP.
 
-    DATA(lv_occupied) = NEW i( ).
-    cut->part1( it_input    = lt_input
-                iv_times    = -1
-                rr_occupied = lv_occupied ).
     cl_abap_unit_assert=>assert_equals(
-      act = lv_occupied->*
+      act = cut->part1( it_input    = lt_input
+                        iv_times    = cut->mc_infinite )
       exp = 37 ).
   ENDMETHOD.
 
@@ -295,22 +192,20 @@ CLASS lcl_test IMPLEMENTATION.
             ( |#.L#LL#.L#| ) ) )
             ).
 
-    LOOP AT lt_all ASSIGNING FIELD-SYMBOL(<lt_step>).
+    LOOP AT lt_all ASSIGNING FIELD-SYMBOL(<lt_step>) FROM 1 TO 1.
       DATA(lv_step) = sy-tabix.
       cl_abap_unit_assert=>assert_equals(
         act = cut->part2(
                 it_input  = lt_input
                 iv_times  = lv_step )
         exp = cut->part2(
-                it_input  = <lt_step> ) ).
+                it_input  = <lt_step>
+                iv_times  = 0 ) ).
     ENDLOOP.
 
-    DATA(lv_occupied) = NEW i( ).
-    cut->part2( it_input    = lt_input
-                iv_times    = -1
-                rr_occupied = lv_occupied ).
     cl_abap_unit_assert=>assert_equals(
-      act = lv_occupied->*
+      act = cut->part2( it_input    = lt_input
+                        iv_times    = cut->mc_infinite )
       exp = 26 ).
   ENDMETHOD.
 

@@ -7,17 +7,17 @@ public section.
 
   interfaces IF_OO_ADT_CLASSRUN .
 
-  data MT_INPUT type STRINGTAB read-only .
+  data MT_INPUT type string_table read-only .
 
   methods CONSTRUCTOR .
   methods PART1
     importing
-      !IT_INPUT type STRINGTAB
+      !IT_INPUT type string_table
     returning
       value(RV_COUNT) type I .
   methods PART2
     importing
-      !IT_INPUT type STRINGTAB
+      !IT_INPUT type string_table
     returning
       value(RV_COUNT) type I .
   PROTECTED SECTION.
@@ -97,12 +97,12 @@ CLASS ZCL_ADVENT2020_DAY12 IMPLEMENTATION.
               lv_current_x    = abap_false.
               lv_current_sign = -1.
             WHEN OTHERS.
-              MESSAGE 'Oops!' TYPE 'X'.
+              ASSERT 1 = 2. " Error
           ENDCASE.
           CONTINUE.
 
         WHEN OTHERS.
-          MESSAGE 'Oops!' TYPE 'X'.
+          ASSERT 1 = 2. " Error
       ENDCASE.
 
       <lv_dest> = <lv_dest> + lv_sign * lv_number.
@@ -156,7 +156,7 @@ CLASS ZCL_ADVENT2020_DAY12 IMPLEMENTATION.
           CONTINUE.
 
         WHEN OTHERS.
-          MESSAGE 'Oops!' TYPE 'X'.
+          ASSERT 1 = 2. " Error
       ENDCASE.
 
       <lv_dest> = <lv_dest> + lv_sign * lv_number.

@@ -1,23 +1,23 @@
-class ZCL_ADVENT2020_DAY15 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day15 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun.
 
-  methods PART1
-    importing
-      !IV_INPUT type STRING
-      !IV_UNTIL type I default 2020
-    returning
-      value(RV_COUNT) type I .
-  methods PART2
-    importing
-      !IV_INPUT type STRING
-    returning
-      value(RV_COUNT) type I .
+    METHODS part1
+      IMPORTING
+        iv_input       TYPE string
+        iv_until       TYPE i DEFAULT 2020
+      RETURNING
+        VALUE(rv_count) TYPE i.
+    METHODS part2
+      IMPORTING
+        iv_input       TYPE string
+      RETURNING
+        VALUE(rv_count) TYPE i.
   PROTECTED SECTION.
 
   PRIVATE SECTION.
@@ -25,7 +25,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY15 IMPLEMENTATION.
+CLASS zcl_advent2020_day15 IMPLEMENTATION.
 
 
   METHOD if_oo_adt_classrun~main.

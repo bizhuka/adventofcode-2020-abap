@@ -21,6 +21,7 @@ CLASS zcl_advent2020_day02 DEFINITION
         RETURNING VALUE(rv_ok) TYPE abap_bool.
   PROTECTED SECTION.
   PRIVATE SECTION.
+    TYPES char1 TYPE c LENGTH 1.
     METHODS _split_rule IMPORTING iv_rule TYPE string
                         EXPORTING ev_char TYPE char1
                                   ev_num1 TYPE i

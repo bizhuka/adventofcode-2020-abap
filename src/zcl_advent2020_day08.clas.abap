@@ -9,12 +9,12 @@ CLASS zcl_advent2020_day08 DEFINITION
 
     METHODS part1
       IMPORTING
-        !it_input      TYPE stringtab
+        !it_input       TYPE string_table
       RETURNING
         VALUE(rv_count) TYPE i .
     METHODS part2
       IMPORTING
-        !it_input      TYPE stringtab
+        !it_input       TYPE string_table
       RETURNING
         VALUE(rv_count) TYPE i .
   PROTECTED SECTION.
@@ -22,6 +22,7 @@ CLASS zcl_advent2020_day08 DEFINITION
   PRIVATE SECTION.
 
     TYPES:
+      char3 TYPE c LENGTH 3,
       BEGIN OF ts_rule,
         cmd    TYPE char3,
         number TYPE i,
@@ -40,7 +41,7 @@ CLASS zcl_advent2020_day08 DEFINITION
 
     METHODS _make_rules
       IMPORTING
-        !it_input      TYPE stringtab
+        !it_input      TYPE string_table
       RETURNING
         VALUE(rt_rule) TYPE tt_rule .
     METHODS _next
@@ -141,7 +142,7 @@ CLASS zcl_advent2020_day08 IMPLEMENTATION.
         ENDIF.
 
       WHEN OTHERS.
-        MESSAGE 'Oops' TYPE 'X'.
+        ASSERT 1 = 2. "ERROR
     ENDCASE.
 
     CHECK lv_ok = abap_true.

@@ -1,48 +1,49 @@
-class ZCL_ADVENT2020_DAY16 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day16 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun .
 
-  types:
-    BEGIN OF ts_note,
+    TYPES:
+      int4_table TYPE STANDARD TABLE OF i WITH DEFAULT KEY,
+      BEGIN OF ts_note,
         name     TYPE string,
         diap     TYPE RANGE OF i,
         t_column TYPE int4_table,
         column   TYPE i,
       END OF ts_note .
-  types:
-    tt_note           TYPE STANDARD TABLE OF ts_note WITH DEFAULT KEY .
-  types:
-    tt_correct_ticket TYPE STANDARD TABLE OF int4_table .
+    TYPES:
+      tt_note           TYPE STANDARD TABLE OF ts_note WITH DEFAULT KEY .
+    TYPES:
+      tt_correct_ticket TYPE STANDARD TABLE OF int4_table .
 
-  methods PART1
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type I .
-  methods PART2
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type DECFLOAT34 .
+    METHODS part1
+      IMPORTING
+        !it_input       TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE i .
+    METHODS part2
+      IMPORTING
+        !it_input       TYPE string_table
+      RETURNING
+        VALUE(rv_count) TYPE decfloat34 .
   PROTECTED SECTION.
 
-private section.
+  PRIVATE SECTION.
 
-  data MT_NOTE type TT_NOTE .
-  data MT_CORRECT_TICKET type TT_CORRECT_TICKET .
+    DATA mt_note TYPE tt_note .
+    DATA mt_correct_ticket TYPE tt_correct_ticket .
 ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY16 IMPLEMENTATION.
+CLASS zcl_advent2020_day16 IMPLEMENTATION.
 
 
-  METHOD IF_OO_ADT_CLASSRUN~MAIN.
+  METHOD if_oo_adt_classrun~main.
     DATA(lt_input)   = NEW lcl_input(  )->mt_input.
     DATA(lv_count1) = part1( it_input = lt_input ).
     DATA(lv_count2) = part2( it_input = lt_input ).
@@ -159,7 +160,7 @@ CLASS ZCL_ADVENT2020_DAY16 IMPLEMENTATION.
 
     rv_count = REDUCE decfloat34( INIT m = CONV decfloat34( 1 )
                                   FOR <ls_dep_note> IN mt_note
-                                  WHERE ( name cp 'departure*' )
+                                  WHERE ( name CP 'departure*' )
                                   NEXT m = m * <lt_my_ticket>[  <ls_dep_note>-column ] ).
   ENDMETHOD.
 ENDCLASS.

@@ -1,57 +1,58 @@
-class ZCL_ADVENT2020_DAY14 definition
-  public
-  final
-  create public .
+CLASS zcl_advent2020_day14 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces IF_OO_ADT_CLASSRUN .
+    INTERFACES if_oo_adt_classrun .
 
-  types:
-    int8x TYPE x LENGTH 8 .
-  types:
-    BEGIN OF ts_result,
+    TYPES:
+      int8x TYPE x LENGTH 8,
+      char4 TYPE c LENGTH 4.
+    TYPES:
+      BEGIN OF ts_result,
         key TYPE int8,
         val TYPE int8,
       END OF ts_result .
-  types:
-    tt_result TYPE HASHED TABLE OF ts_result WITH UNIQUE KEY key .
+    TYPES:
+      tt_result TYPE HASHED TABLE OF ts_result WITH UNIQUE KEY key .
 
-  constants:
-    BEGIN OF ms_type,
-                 mask   TYPE char4 VALUE 'mask',
-                 memory TYPE char4 VALUE 'mem[',
-               END OF ms_type .
+    CONSTANTS:
+      BEGIN OF ms_type,
+        mask   TYPE char4 VALUE 'mask',
+        memory TYPE char4 VALUE 'mem[',
+      END OF ms_type .
 
-  methods PART1
-    importing
-      !IT_INPUT type STRINGTAB
-    returning
-      value(RV_COUNT) type INT8 .
-  methods PART2
-    importing
-      !IT_INPUT type STRINGTAB
-      !IV_INIT type ABAP_BOOL default ABAP_TRUE
-    returning
-      value(RV_COUNT) type INT8 .
-  methods BINARY_2_INT
-    importing
-      !IV_BINARY type STRING
-    exporting
-      !EV_DEC type INT8
-      !EV_XDEC type INT8X .
-  methods MASK_2_INT
-    importing
-      !IV_BINARY type STRING
-    exporting
-      !EV_OR type INT8X
-      !EV_AND type INT8X .
-  methods MASK_PART_01
-    importing
-      !IV_MASK type STRING
-      !IV_NUMBER type STRING
-    returning
-      value(RV_NUMBER) type INT8 .
+    METHODS part1
+      IMPORTING
+        !it_input       TYPE stringtab
+      RETURNING
+        VALUE(rv_count) TYPE int8 .
+    METHODS part2
+      IMPORTING
+        !it_input       TYPE stringtab
+        !iv_init        TYPE abap_bool DEFAULT abap_true
+      RETURNING
+        VALUE(rv_count) TYPE int8 .
+    METHODS binary_2_int
+      IMPORTING
+        !iv_binary TYPE string
+      EXPORTING
+        !ev_dec    TYPE int8
+        !ev_xdec   TYPE int8x .
+    METHODS mask_2_int
+      IMPORTING
+        !iv_binary TYPE string
+      EXPORTING
+        !ev_or     TYPE int8x
+        !ev_and    TYPE int8x .
+    METHODS mask_part_01
+      IMPORTING
+        !iv_mask         TYPE string
+        !iv_number       TYPE string
+      RETURNING
+        VALUE(rv_number) TYPE int8 .
   PROTECTED SECTION.
 
   PRIVATE SECTION.
@@ -76,7 +77,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ADVENT2020_DAY14 IMPLEMENTATION.
+CLASS zcl_advent2020_day14 IMPLEMENTATION.
 
 
   METHOD binary_2_int.
