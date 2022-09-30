@@ -2,77 +2,10 @@
 *"* local helper classes, interface definitions and type
 *"* declarations
 
-
-
-CLASS lcl_tile IMPLEMENTATION.
-  METHOD constructor.
-    ASSERT lines( it_array ) = 11.
-    _ord = iv_index.
-
-    ASSIGN it_array[ 1 ] TO FIELD-SYMBOL(<lv_tile>).
-    ASSERT <lv_tile> CP 'Tile *:'.
-    id   = <lv_tile>+5(4).
-
-    APPEND LINES OF it_array FROM 2 TO 11 TO t_image[].
-    _set_borders( ).
-  ENDMETHOD.
-
-  METHOD _set_borders.
-    DATA(border_a)  = t_image[ 1 ].
-    DATA(border_c)  = t_image[ 10 ].
-    DATA(border_b)  = ||.
-    DATA(border_d)  = ||.
-    DO 10 TIMES.
-      ASSIGN t_image[ sy-index ] TO FIELD-SYMBOL(<lv_row>).
-      border_b = border_b && <lv_row>+9(1).
-      border_d = border_d && <lv_row>+0(1).
-    ENDDO.
-
-    t_borders = VALUE #( ( border_a ) ( border_b ) ( border_c ) ( border_d ) ).
-  ENDMETHOD.
-
-  METHOD paste_next_combination.
-    fit_count = 0.
-    DATA(lv_from) = ( _ord - 1 ) * 8.
-    DO 8 TIMES.
-      ASSIGN ct_match[ lv_from + sy-index ] TO FIELD-SYMBOL(<ls_match>).
-      <ls_match>-tile   = me.
-      <ls_match>-border = COND #( WHEN sy-index < 5 THEN          t_borders[ sy-index ]
-                                                    ELSE reverse( t_borders[ sy-index  - 4 ] ) ).
-    ENDDO.
-  ENDMETHOD.
-
-  METHOD flip_border.
-    _flip_count = ( _flip_count + 1 ) MOD 3.
-    CASE _flip_count.
-      WHEN 1.
-        t_borders[ 1 ] = reverse( t_borders[ 1 ] ).
-        t_borders[ 3 ] = reverse( t_borders[ 3 ] ).
-      WHEN 2.
-        " restore prevois state
-        t_borders[ 1 ] = reverse( t_borders[ 1 ] ).
-        t_borders[ 1 ] = reverse( t_borders[ 1 ] ).
-
-        t_borders[ 2 ] = reverse( t_borders[ 2 ] ).
-        t_borders[ 4 ] = reverse( t_borders[ 4 ] ).
-
-      WHEN 0.
-        " Return to original state
-        t_borders[ 2 ] = reverse( t_borders[ 2 ] ).
-        t_borders[ 4 ] = reverse( t_borders[ 4 ] ).
-
-      WHEN OTHERS.
-    ENDCASE.
-  ENDMETHOD.
-ENDCLASS.
-
-**********************************************************************
-**********************************************************************
-
-CLASS lcl_input DEFINITION.
+CLASS lcl_input DEFINITION FINAL.
   PUBLIC SECTION.
     METHODS constructor.
-    DATA mt_input TYPE stringtab.
+    DATA mt_input TYPE string_table.
 ENDCLASS.
 
 CLASS lcl_input IMPLEMENTATION.

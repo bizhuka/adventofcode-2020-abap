@@ -34,7 +34,9 @@ ENDCLASS.
 
 
 
-CLASS zcl_advent2020_day04 IMPLEMENTATION.
+CLASS ZCL_ADVENT2020_DAY04 IMPLEMENTATION.
+
+
   METHOD constructor.
     INSERT 'byr' INTO TABLE mt_required.
     INSERT 'iyr' INTO TABLE mt_required.
@@ -45,22 +47,56 @@ CLASS zcl_advent2020_day04 IMPLEMENTATION.
     INSERT 'pid' INTO TABLE mt_required.
   ENDMETHOD.
 
-  METHOD valid_count.
-    DATA(lv_input) = concat_lines_of( table = it_input sep = cl_abap_char_utilities=>newline ).
-    SPLIT lv_input AT cl_abap_char_utilities=>newline && cl_abap_char_utilities=>newline INTO TABLE DATA(lt_input).
 
-    LOOP AT lt_input INTO DATA(lv_passport).
-*      DATA(lv_tabix) = sy-tabix.
-*      DATA(lv_ok)    = abap_undefined.
-      IF is_valid( iv_passport    = lv_passport
-                      iv_check_value = iv_check_value ) = abap_true.
-        rv_count = rv_count + 1.
-*         lv_ok    = abap_true.
-      ENDIF.
+  METHOD if_oo_adt_classrun~main.
+*    _out = out.
 
-*      _out->write( |{ lv_tabix } = { lv_ok }| ).
-    ENDLOOP.
+    DATA(lt_input)   = NEW lcl_input(  )->mt_input.
+    DATA(lv_count_1) = valid_count( lt_input ).
+    DATA(lv_count_2) = valid_count( it_input       = lt_input
+                                    iv_check_value = abap_true ).
+    out->write( |{ lv_count_1 } - { lv_count_2 }| ).
   ENDMETHOD.
+
+
+  METHOD is_ok.
+    CASE iv_key.
+      WHEN 'byr'.
+        FIND REGEX '^\d{4}$' IN iv_value.
+        rv_ok = xsdbool( sy-subrc  = 0 AND iv_value BETWEEN |1920| AND |2002| ).
+
+      WHEN 'iyr'.
+        FIND REGEX '^\d{4}$' IN iv_value.
+        rv_ok = xsdbool( sy-subrc  = 0 AND iv_value BETWEEN |2010| AND |2020| ).
+
+      WHEN 'eyr'.
+        FIND REGEX '^\d{4}$' IN iv_value.
+        rv_ok = xsdbool( sy-subrc  = 0 AND iv_value BETWEEN |2020| AND |2030| ).
+
+      WHEN 'hgt'.
+        FIND REGEX '^(\d+)(cm|in)$' IN iv_value SUBMATCHES DATA(lt_height)
+                                                           DATA(lv_unit).
+        CHECK sy-subrc  = 0.
+        rv_ok = COND #(  WHEN lv_unit = 'cm' THEN xsdbool( lt_height BETWEEN |150| AND |193| )
+                         WHEN lv_unit = 'in' THEN xsdbool( lt_height BETWEEN |59|  AND |76| ) ).
+
+      WHEN 'hcl'.
+        FIND REGEX '^\#[0-9a-f]{6}$' IN iv_value.
+        rv_ok = xsdbool( sy-subrc = 0 ).
+
+      WHEN 'pid'.
+        FIND REGEX '^\d{9}$' IN iv_value.
+        rv_ok = xsdbool( sy-subrc = 0 ).
+
+      WHEN 'ecl'.
+        FIND REGEX '^(amb|\bblu|\bbrn|\bgry|\bgrn|\bhzl|\both)$' IN iv_value.
+        rv_ok = xsdbool( sy-subrc = 0 ).
+
+      WHEN OTHERS.
+        rv_ok = abap_true.
+    ENDCASE.
+  ENDMETHOD.
+
 
   METHOD is_valid.
     DATA(lt_required) = mt_required.
@@ -83,53 +119,21 @@ CLASS zcl_advent2020_day04 IMPLEMENTATION.
     rv_ok = xsdbool( lt_required[] IS INITIAL ).
   ENDMETHOD.
 
-  METHOD is_ok.
-    CASE iv_key.
-      WHEN 'byr'.
-        FIND PCRE '^\d{4}$' IN iv_value.
-        rv_ok = xsdbool( sy-subrc  = 0 AND iv_value BETWEEN |1920| AND |2002| ).
 
-      WHEN 'iyr'.
-        FIND PCRE '^\d{4}$' IN iv_value.
-        rv_ok = xsdbool( sy-subrc  = 0 AND iv_value BETWEEN |2010| AND |2020| ).
+  METHOD valid_count.
+    DATA(lv_input) = concat_lines_of( table = it_input sep = cl_abap_char_utilities=>newline ).
+    SPLIT lv_input AT cl_abap_char_utilities=>newline && cl_abap_char_utilities=>newline INTO TABLE DATA(lt_input).
 
-      WHEN 'eyr'.
-        FIND PCRE '^\d{4}$' IN iv_value.
-        rv_ok = xsdbool( sy-subrc  = 0 AND iv_value BETWEEN |2020| AND |2030| ).
+    LOOP AT lt_input INTO DATA(lv_passport).
+*      DATA(lv_tabix) = sy-tabix.
+*      DATA(lv_ok)    = abap_undefined.
+      IF is_valid( iv_passport    = lv_passport
+                      iv_check_value = iv_check_value ) = abap_true.
+        rv_count = rv_count + 1.
+*         lv_ok    = abap_true.
+      ENDIF.
 
-      WHEN 'hgt'.
-        FIND PCRE '^(\d+)(cm|in)$' IN iv_value SUBMATCHES DATA(lt_height)
-                                                           DATA(lv_unit).
-        CHECK sy-subrc  = 0.
-        rv_ok = COND #(  WHEN lv_unit = 'cm' THEN xsdbool( lt_height BETWEEN |150| AND |193| )
-                         WHEN lv_unit = 'in' THEN xsdbool( lt_height BETWEEN |59|  AND |76| ) ).
-
-      WHEN 'hcl'.
-        FIND PCRE '^\#[0-9a-f]{6}$' IN iv_value.
-        rv_ok = xsdbool( sy-subrc = 0 ).
-
-      WHEN 'pid'.
-        FIND PCRE '^\d{9}$' IN iv_value.
-        rv_ok = xsdbool( sy-subrc = 0 ).
-
-      WHEN 'ecl'.
-        FIND PCRE '^(amb|\bblu|\bbrn|\bgry|\bgrn|\bhzl|\both)$' IN iv_value.
-        rv_ok = xsdbool( sy-subrc = 0 ).
-
-      WHEN OTHERS.
-        rv_ok = abap_true.
-    ENDCASE.
+*      _out->write( |{ lv_tabix } = { lv_ok }| ).
+    ENDLOOP.
   ENDMETHOD.
-
-  METHOD if_oo_adt_classrun~main.
-*    _out = out.
-
-    DATA(lt_input)   = NEW lcl_input(  )->mt_input.
-    DATA(lv_count_1) = valid_count( lt_input ).
-    DATA(lv_count_2) = valid_count( it_input       = lt_input
-                                    iv_check_value = abap_true ).
-    out->write( |{ lv_count_1 } - { lv_count_2 }| ).
-  ENDMETHOD.
-
-
 ENDCLASS.

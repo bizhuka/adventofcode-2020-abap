@@ -67,7 +67,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_advent2020_day11 IMPLEMENTATION.
+CLASS ZCL_ADVENT2020_DAY11 IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -127,7 +127,7 @@ CLASS zcl_advent2020_day11 IMPLEMENTATION.
       rv_count = REDUCE #( INIT s = 0
                            FOR <line> IN mt_2dim
                            WHERE ( seat = ms_seat-occupied )
-                           NEXT s += 1 ).
+                           NEXT s = s + 1 ).
       RETURN.
     ENDDO.
   ENDMETHOD.
@@ -139,21 +139,6 @@ CLASS zcl_advent2020_day11 IMPLEMENTATION.
              it_input    = it_input
              iv_times    = iv_times
              iv_occupied = 5 ).
-  ENDMETHOD.
-
-
-  METHOD _get_2dim.
-    LOOP AT it_input INTO DATA(lv_input).
-      DATA(y) = sy-tabix.
-      DO strlen( lv_input ) TIMES.
-        DATA(x) = sy-index.
-
-        DATA(lv_off)  = x - 1.
-        INSERT VALUE #( x     = x
-                        y     = y
-                        seat  = lv_input+lv_off(1) ) INTO TABLE rt_2dim[].
-      ENDDO.
-    ENDLOOP.
   ENDMETHOD.
 
 
@@ -176,6 +161,21 @@ CLASS zcl_advent2020_day11 IMPLEMENTATION.
         CHECK <ls_result> IS ASSIGNED.
         <ls_result>-count += 1.
       ENDLOOP.
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD _get_2dim.
+    LOOP AT it_input INTO DATA(lv_input).
+      DATA(y) = sy-tabix.
+      DO strlen( lv_input ) TIMES.
+        DATA(x) = sy-index.
+
+        DATA(lv_off)  = x - 1.
+        INSERT VALUE #( x     = x
+                        y     = y
+                        seat  = lv_input+lv_off(1) ) INTO TABLE rt_2dim[].
+      ENDDO.
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
